@@ -24,6 +24,7 @@ jobs:
         uses: devcontainers/ci@v0.2
         with:
           imageName: ghcr.io/daddycocoaman/base-ubuntu
-          refFilterForPush: "refs/head/main"
+          refFilterForPush: |
+            "refs/head/main"
           subFolder: "base-ubuntu"
 
