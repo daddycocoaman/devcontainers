@@ -9,7 +9,11 @@
 		"CHOOSENIM_NO_ANALYTICS": "1"
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y && nimble -d install",
+	"postCreateCommand": ["curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y", 
+						  "&& export PATH=$PATH:$HOME/.nimble/bin",
+						  "&& echo $PATH >> ~/.profile"],
+	"postStartCommand": "nimble -d install",
+	
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
