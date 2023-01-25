@@ -23,8 +23,8 @@ jobs:
       - name: Build and run dev container task
         uses: devcontainers/ci@v0.2
         with:
-          imageName: ghcr.io/daddycocoaman/base-ubuntu
+          imageName: ghcr.io/daddycocoaman/dc-ubuntu-base
           refFilterForPush: |
-            "refs/head/main"
+            refs/head/main
           subFolder: "base-ubuntu"
 
