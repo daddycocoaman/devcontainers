@@ -1,0 +1,29 @@
+#/bin/sh
+
+name: 'Build Containers' 
+on: # rebuild any PRs and main branch changes
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and run dev container task
+        uses: devcontainers/ci@v0.2
+        with:
+          imageName: ghcr.io/daddycocoaman/base-ubuntu
+          refFilterForPush: "refs/head/main"
+          subFolder: "base-ubuntu"
+
