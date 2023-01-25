@@ -4,15 +4,46 @@ name: 'Build Containers'
 on: # rebuild any PRs and main branch changes
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches: 
+      - "main"
 
 jobs:
-  build:
+  get-changes:
+    name: "Get Changes"
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v2
       
+      - name: Get changed files in container folders
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          dir_names: true
+          dir_names_max_depth: 1
+          json: true
+          files: |
+            ubuntu-base/**
+            debian-base/**
+            nim/**
+
+      - name: List all changed files
+        run: echo '${{ steps.changed-files.outputs.all_changed_files }}'
+      - id: set-matrix
+        run: echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"      
+
+  build-changes:
+    name: Build changed containers
+    runs-on: ubuntu-latest
+    needs: [changed-files]
+    if: steps.changed-containers.outputs.any_changed == 'true'
+    strategy:
+      matrix: ${{ fromJSON(needs.changed-files.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 2
+    steps:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1 
         with:
@@ -20,9 +51,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and run dev container task
+      - name: Build containers
         uses: devcontainers/ci@v0.2
         with:
-          imageName: ghcr.io/daddycocoaman/dc-ubuntu-base
-          subFolder: "ubuntu-base"
+          imageName: ghcr.io/daddycocoaman/dc-${{ matrix.container }}
+          subFolder: ${{ matrix.container }}
+
+      
 

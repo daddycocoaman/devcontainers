@@ -1,0 +1,24 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Dev-Nim",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "ghcr.io/daddycocoaman/dc-debian-base:latest",
+	"features": {},
+	"remoteEnv": {
+		"CHOOSENIM_NO_ANALYTICS": "1"
+	},
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "curl https://nim-lang.org/choosenim/init.sh -sSf | sh -s -- -y && nimble -d install",
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools",
+				"nimsaem.nimvscode",
+				"vadimcn.vscode-lldb"
+			]
+		}
+	},
+	"remoteUser": "vscode"
+}
