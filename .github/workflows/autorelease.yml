@@ -39,7 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [get-changes]
     strategy:
-      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+      matrix: 
+        containers: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+        exclude:
+          - containers: ${{ endsWith(matrix.containers.*, 'base'}}
       fail-fast: false
     steps:
       - name: Checkout (GitHub)
@@ -66,7 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-bases]
     strategy:
-      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+      matrix: 
+        containers: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+        exclude:
+          - containers: ${{ !endsWith(matrix.containers.*, 'base'}}
       fail-fast: false
     steps:
       - name: Checkout (GitHub)
