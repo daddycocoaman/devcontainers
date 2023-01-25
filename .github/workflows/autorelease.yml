@@ -15,7 +15,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout (GitHub)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Get changed files in container folders
         id: changed-files
@@ -34,16 +34,20 @@ jobs:
       - id: set-matrix
         run: echo "matrix={\"container\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"      
 
-  build-changes:
-    name: Build changed containers
+  build-bases:
+    name: Build changed base containers
     runs-on: ubuntu-latest
     needs: [get-changes]
     strategy:
       matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
       fail-fast: false
-      max-parallel: 2
     steps:
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v3
+        if: endsWith(matrix.container, 'base')
+
       - name: Login to GitHub Container Registry
+        if: endsWith(matrix.container, 'base')
         uses: docker/login-action@v1 
         with:
           registry: ghcr.io
@@ -51,10 +55,36 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build containers
+        if: endsWith(matrix.container, 'base')
         uses: devcontainers/ci@v0.2
         with:
           imageName: ghcr.io/daddycocoaman/dc-${{ matrix.container }}
           subFolder: ${{ matrix.container }}
 
-      
+  build-containers:
+    name: Build changed containers
+    runs-on: ubuntu-latest
+    needs: [build-bases]
+    strategy:
+      matrix: ${{ fromJSON(needs.get-changes.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - name: Checkout (GitHub)
+        if:  ${{ !endsWith(matrix.container, 'base') }} 
+        uses: actions/checkout@v3
+        
+      - name: Login to GitHub Container Registry
+        if:  ${{ !endsWith(matrix.container, 'base') }} 
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build containers
+        if:  ${{ !endsWith(matrix.container, 'base') }} 
+        uses: devcontainers/ci@v0.2
+        with:
+          imageName: ghcr.io/daddycocoaman/dc-${{ matrix.container }}
+          subFolder: ${{ matrix.container }}
 
