@@ -26,5 +26,5 @@ jobs:
           imageName: ghcr.io/daddycocoaman/dc-ubuntu-base
           refFilterForPush: |
             refs/head/main
-          subFolder: "base-ubuntu"
+          subFolder: "ubuntu-base"
 
